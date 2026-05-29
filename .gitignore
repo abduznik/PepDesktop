@@ -1,5 +1,8 @@
-# Pepsiman Extracted Files
-Testing/Pepsiman_Extracted/
+# Compiled binaries (root only)
+/*.exe
+/*.dll
+/*.o
+/*.obj
 
 # Python artifacts
 __pycache__/
@@ -7,5 +10,13 @@ __pycache__/
 *.pyo
 *.pyd
 
-# Thirdparty
-thirdparty/idecomp/
+# Runtime logs
+dll_loaded.txt
+inject_log.txt
+
+# Visual Studio
+.vs/
+Debug/
+Release/
+
+# Keep Portable_Pepsiman/ - it's the deliverable
