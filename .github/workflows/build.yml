@@ -25,6 +25,9 @@ jobs:
           install: >
             mingw-w64-x86_64-gcc
 
+      - name: Create output directory
+        run: mkdir -p build
+
       - name: Build launcher (c launcher)
         run: gcc launcher.c -o build/PlayPepsiman.exe -luser32 -lgdi32 -O2
 
