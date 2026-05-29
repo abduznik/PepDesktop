@@ -16,8 +16,6 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-        with:
-          submodules: recursive
 
       - name: Set up MSYS2
         uses: msys2/setup-msys2@v2
@@ -27,14 +25,14 @@ jobs:
           install: >
             mingw-w64-x86_64-gcc
 
-      - name: Build launcher
-        run: gcc launcher.c -o PlayPepsiman.exe -luser32 -lgdi32
+      - name: Build launcher (c launcher)
+        run: gcc launcher.c -o build/PlayPepsiman.exe -luser32 -lgdi32 -O2
 
       - name: Build PepsimanHook DLL
-        run: gcc PepsimanHook.c -shared -o PepsimanHook.dll -luser32 -lgdi32 -static-libgcc
+        run: gcc PepsimanHook.c -shared -o build/PepsimanHook.dll -luser32 -lgdi32 -static-libgcc -O2
 
-      - name: Build PlayPepsiman (injector launcher)
-        run: gcc PlayPepsiman.c -o PlayPepsiman.exe -luser32 -lkernel32 || true
+      - name: Build Injector (standalone DLL injector)
+        run: gcc Injector.c -o build/Injector.exe -luser32 -lkernel32 -O2
 
       - name: Check Python syntax
         run: |
@@ -44,10 +42,10 @@ jobs:
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: portable-pepsiman
+          name: PepDesktop-v${{ github.run_number }}
           path: |
-            PlayPepsiman.exe
-            PepsimanHook.dll
+            build/*.exe
+            build/*.dll
             make_portable.py
             extract_pepsi.py
-          if-no-files-found: warn
+          if-no-files-found: error
