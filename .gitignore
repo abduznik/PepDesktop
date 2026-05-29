@@ -19,4 +19,5 @@ inject_log.txt
 Debug/
 Release/
 
-# Keep Portable_Pepsiman/ - it's the deliverable
+# Portable_Pepsiman/ - pre-built deployment (extracted by user)
+Portable_Pepsiman/
