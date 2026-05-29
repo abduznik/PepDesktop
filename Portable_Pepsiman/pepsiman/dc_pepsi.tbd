@@ -1,0 +1,7 @@
+[Settings]
+Path=pepsiman\
+Body=pepsiman.bac
+Texture=pepsi,pepsi1 
+BaseSpeed=1.00
+MotorFile=figure.mot
+YOffset=-60

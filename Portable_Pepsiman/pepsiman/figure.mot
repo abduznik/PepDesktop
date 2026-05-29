@@ -1,0 +1,543 @@
+# 0.55 -100
+ac11			#waniwalk
+	1.15     1.15
+	0.0	0.0	0.75
+	0.65
+	-
+	0 0
+	ac11
+
+	ac11		-
+	ac10		3	xac11x10
+	ac16		4	ac16
+	ac2		4	ac16
+	ac3		4	ac16
+	ac17		4	ac16
+	ac5		4	ac16
+	ac1		4	ac16
+	ac18		4	ac16
+	ac6		4	ac16
+	ac4		4	ac16
+	ac9		4	ac16
+	ac12		+2	ac12
+	ac13		+2	ac13
+	ac14		+2	ac12
+	ac15		+2	ac13
+	ac7		4	ac16
+	ac8		4	ac16
+ac12
+	1.0	1.0
+	-0.025	-0.025	0.75
+	0.4
+	-
+	0 0
+	ac12
+
+	ac11		+2	ac11
+	ac10		+2	ac11
+	ac16		+2	ac11
+	ac2		+2	ac11
+	ac3		+2	ac11
+	ac17		+2	ac11
+	ac5		+2	ac11
+	ac1		+2	ac11
+	ac18		+2	ac11
+	ac6		+2	ac11
+	ac4		+2	ac11
+	ac9		+2	ac11
+	ac12		-
+	ac13		+2	ac11
+	ac14		+2	ac14
+	ac15		+2	ac11
+	ac7		+2	ac11
+	ac8		+2	ac11
+ac13
+	1.0	1.0
+	0.025	0.025	0.75
+	0.4
+	-
+	0 0
+	ac13
+
+	ac11		+2	ac11
+	ac10		+2	ac11
+	ac16		+2	ac11
+	ac2		+2	ac11
+	ac3		+2	ac11
+	ac17		+2	ac11
+	ac5		+2	ac11
+	ac1		+2	ac11
+	ac18		+2	ac11
+	ac6		+2	ac11
+	ac4		+2	ac11
+	ac9		+2	ac11	
+	ac12		+2	ac11
+	ac13		-
+	ac14		+2	ac11
+	ac15		+2	ac15
+	ac7		+2	ac11
+	ac8		+2	ac11
+ac14
+	1.0	1.0
+	-0.05	-0.05	0.75
+	0.4
+	-
+	0 0
+	ac14
+
+	ac11		+2	ac12
+	ac10		+2	ac12
+	ac16		+2	ac12
+	ac2		+2	ac12
+	ac3		+2	ac12
+	ac17		+2	ac12
+	ac5		+2	ac12
+	ac1		+2	ac12
+	ac18		+2	ac12
+	ac6		+2	ac12
+	ac4		+2	ac12
+	ac9		+2	ac12
+	ac12		+2	ac12
+	ac13		+2	ac12
+	ac14		-
+	ac15		+2	ac12
+	ac7		+2	ac12
+	ac8		+2	ac12
+ac15
+	1.0	1.0
+	0.05	0.05	0.75
+	0.45
+	-
+	0 0
+	ac15
+
+	ac11		+2	ac13
+	ac10		+2	ac13
+	ac16		+2	ac13
+	ac2		+2	ac13
+	ac3		+2	ac13
+	ac17		+2	ac13
+	ac5		+2	ac13
+	ac1		+2	ac13
+	ac18		+2	ac13
+	ac6		+2	ac13
+	ac4		+2	ac13
+	ac9		+2	ac13
+	ac12		+2	ac13
+	ac13		+2	ac13
+	ac14		+2	ac13
+	ac15		-
+	ac7		+2	ac13
+	ac8		+2	ac13
+ac10
+	2.0	2.0
+	0.0	0.0	0.0
+	0.5
+	-
+	0 0
+	ac10
+
+	ac11		4	ac11
+	ac10		-
+	ac16		2	xac16x10
+	ac2		2	xac16x10
+	ac3		2	xac16x10
+	ac17		2	xac16x10
+	ac5		2	xac16x10
+	ac1		2	xac16x10
+	ac18		2	xac16x10
+	ac6		2	xac16x10
+	ac4		2	xac16x10
+	ac9		4	ac11
+	ac12		4	ac11
+	ac13		4	ac11
+	ac14		4	ac11
+	ac15		4	ac11
+	ac7		2	xac16x10
+	ac8		2	xac16x10
+ac16
+	0.0	0.0
+	0.0	0.0	0.0
+	0.5
+	-
+	0 0
+	ac16
+
+	ac11		4	ac11
+	ac10		4	ac10
+	ac16		-
+	ac2		6	ac2
+	ac3		3	ac3
+	ac17		2	xac17x16
+	ac5		2	xac17x16
+	ac1		2	xac17x16
+	ac18		2	xac16x18
+	ac6		2	xac16x18
+	ac4		2	xac16x18
+	ac9		2	xac16x9
+	ac12		4	ac12
+	ac13		4	ac13
+	ac14		4	ac14
+	ac15		4	ac15
+	ac7		2	xac17x16
+	ac8		3	ac8
+ac2
+	-0.2	0.05
+	0.0	0.0	0.0
+	0.5
+	-
+	0 0
+	ac2
+
+	ac11		4	ac16
+	ac10		4	ac16
+	ac16		4	ac16
+	ac2		-
+	ac3		4	ac16
+	ac17		4	ac16
+	ac5		4	ac16
+	ac1		4	ac16
+	ac18		4	ac16
+	ac6		4	ac16
+	ac4		4	ac16
+	ac9		4	ac16
+	ac12		4	ac16
+	ac13		4	ac16
+	ac14		4	ac16
+	ac15		4	ac16
+	ac7		4	ac16
+	ac8		4	ac16
+ac3
+	0.8	1.5
+	-0.01	0.0	0.0
+	0.6
+	-
+	0 0
+	ac3
+
+	ac11		4	ac16
+	ac10		4	ac16
+	ac16		4	ac16
+	ac2		4	ac16
+	ac3		-
+	ac17		4	ac16
+	ac5		4	ac16
+	ac1		4	ac16
+	ac18		4	ac16
+	ac6		4	ac16
+	ac4		4	ac16
+	ac9		4	ac16
+	ac12		4	ac16
+	ac13		4	ac16
+	ac14		4	ac16
+	ac15		4	ac16
+	ac7		4	ac16
+	ac8		4	ac16
+ac17
+	0.0	0.0
+	0.0	0.0	0.0
+	0.35
+	-
+	0 0
+	ac17
+
+	ac11		2	xac16x17
+	ac10		2	xac16x17
+	ac16		2	xac16x17
+	ac2		2	xac16x17
+	ac3		2	xac16x17
+	ac17		-
+	ac5		6	ac5
+	ac1		3	ac1
+	ac18		2	xac17x18
+	ac6		2	xac17x18
+	ac4		2	xac17x18
+	ac9		2	xac16x17
+	ac12		2	xac16x17
+	ac13		2	xac16x17
+	ac14		2	xac16x17
+	ac15		2	xac16x17
+	ac7		3	ac7
+	ac8		2	xac16x17
+ac5
+	0.0	0.0
+	0.0	0.0	0.0
+	0.3
+	-
+	0 0
+	ac5
+
+	ac11		4	ac17
+	ac10		4	ac17
+	ac16		4	ac17
+	ac2		4	ac17
+	ac3		4	ac17
+	ac17		4	ac17
+	ac5		-
+	ac1		4	ac17
+	ac18		4	ac17
+	ac6		4	ac17
+	ac4		4	ac17
+	ac9		4	ac17
+	ac12		4	ac17
+	ac13		4	ac17
+	ac14		4	ac17
+	ac15		4	ac17
+	ac7		4	ac17
+	ac8		4	ac17
+ac1
+	0.0	0.0
+	0.0	0.0	0.0
+	0.4
+	-
+	0 0
+	ac1
+
+	ac11		4	ac17
+	ac10		4	ac17
+	ac16		4	ac17
+	ac2		4	ac17
+	ac3		4	ac17
+	ac17		4	ac17
+	ac5		4	ac17
+	ac1		-
+	ac18		4	ac17
+	ac6		4	ac17
+	ac4		4	ac17
+	ac9		4	ac17
+	ac12		4	ac17
+	ac13		4	ac17
+	ac14		4	ac17
+	ac15		4	ac17
+	ac7		4	ac17
+	ac8		4	ac17
+ac18
+	0.0	0.0
+	0.0	0.0	0.0
+	0.4
+	-
+	0 0
+	ac18
+
+	ac11		2	xac18x16
+	ac10		2	xac18x16
+	ac16		2	xac18x16
+	ac2		2	xac18x16
+	ac3		2	xac18x16
+	ac17		2	xac18x17
+	ac5		2	xac18x17
+	ac1		2	xac18x17
+	ac18		-
+	ac6		8	ac6
+	ac4		3	ac4
+	ac9		2	xac18x16
+	ac12		2	xac18x16
+	ac13		2	xac18x16
+	ac14		2	xac18x16
+	ac15		2	xac18x16
+	ac7		2	xac18x17
+	ac8		2	xac18x16
+
+ac6
+	0.0	0.0
+	0.0	0.0	0.0
+	0.6
+	-
+	0 0
+	ac6
+
+	ac11		4	xac18x16
+	ac10		4	xac18x16
+	ac16		4	xac18x16
+	ac2		4	xac18x16
+	ac3		4	xac18x16
+	ac17		4	xac18x17
+	ac5		4	xac18x17
+	ac1		4	xac18x17
+	ac18		6	ac18
+	ac6		-
+	ac4		4	ac18
+	ac9		4	xac18x16
+	ac12		4	xac18x16
+	ac13		4	xac18x16
+	ac14		4	xac18x16
+	ac15		4	xac18x16
+	ac7		4	xac18x17
+	ac8		4	xac18x16
+ac4
+	0.0	0.0
+	0.0	0.0	0.0
+	0.4
+	-
+	0 0
+	ac4b
+
+ac9
+	0.0	0.0
+	0.0	0.0	0.0
+	0.5
+	-
+	0 0
+	ac9
+
+	ac11		2	xac9x16
+	ac10		2	xac9x16
+	ac16		2	xac9x16
+	ac2		2	xac9x16
+	ac3		2	xac9x16
+	ac17		2	xac9x16
+	ac5		2	xac9x16
+	ac1		2	xac9x16
+	ac18		2	xac9x16
+	ac6		2	xac9x16
+	ac4		2	xac9x16
+	ac9		-
+	ac12		2	xac9x16
+	ac13		2	xac9x16
+	ac14		2	xac9x16
+	ac15		2	xac9x16
+	ac7		2	xac9x16
+	ac8		2	xac9x16
+xac17x16
+	0.0	0.0
+	0.0	0.0	0.0
+	0.4
+	-
+	0 0
+	ac17
+
+	ac11		4	ac11
+	ac10		4	ac10
+	ac16		-
+	ac2		-
+	ac3		-
+	ac17		-
+	ac5		-
+	ac1		-
+	ac18		-
+	ac6		-
+	ac4		-
+	ac9		-
+	ac12		4	ac12
+	ac13		4	ac13
+	ac14		4	ac14
+	ac15		4	ac15
+	ac7		-
+	ac8		-
+xac16x17
+	0.0	0.0
+	0.0	0.0	0.0
+	0.4
+	-
+	0 0
+	ac16
+
+	ac11		4	ac11
+	ac10		4	ac10
+	ac16		-
+	ac2		-
+	ac3		-
+	ac17		-
+	ac5		-
+	ac1		-
+	ac18		-
+	ac6		-
+	ac4		-
+	ac9		-
+	ac12		4	ac12
+	ac13		4	ac13
+	ac14		4	ac14
+	ac15		4	ac15
+	ac7		-
+	ac8		-
+
+xac16x10
+	0.6	0.0
+	0.0	0.0	0.0
+	0.4
+	-
+	0 0
+	ac19
+
+xac17x18
+	0.0	0.0
+	0.0	0.0	0.0
+	0.4
+	-
+	0 0	
+	ac18
+xac18x17
+	0.0	0.0
+	0.0	0.0	0.0
+	0.45
+	-
+	0 0
+	ac17
+xac16x18
+	0.0	0.0
+	0.0	0.0	0.0
+	0.4
+	-
+	0 0
+	ac18
+xac18x16
+	0.0	0.0
+	0.0	0.0	0.0
+	0.4
+	-
+	0 0
+	ac16
+xac16x9
+	0.0	0.0
+	0.0	0.0	0.0
+	0.4
+	-
+	0 0
+	ac9
+xac9x16
+	0.0	0.0
+	0.0	0.0	0.0
+	0.4
+	-
+	0 0
+	ac16
+
+ac7
+	0.0	0.0
+	0.0	0.0	0.0
+	0.25
+	-
+	0 0
+	ac17
+ac8		#punch
+	0.0	0.0
+	0.0	0.0	0.0
+	0.4
+	25
+	0 0 
+	20 1
+	ac16
+xac11x10
+	0.0	0.0
+	0.0	0.0	0.0
+	0.5
+	-
+	0 0
+	ac10
+
+ac19
+	0.0	0.0
+	0.0	0.0	0.0	
+	0.3
+	-
+	0 0
+	ac16
+ac4b
+	0.0	0.0
+	0.0	0.0	0.0	
+	0.4	
+	-
+	0 0
+	ac18
+	
+	

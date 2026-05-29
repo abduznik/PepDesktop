@@ -1,0 +1,7 @@
+[Settings]
+Path=F:\Coding\Desktop-Character-Patcher-for-Pepsiman-1997-\Portable_Pepsiman\pepsiman\
+Body=pepsiman.bac
+Texture=pepsi,pepsi1
+BaseSpeed=1.00
+MotorFile=figure.mot
+YOffset=-60

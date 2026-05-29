@@ -1,0 +1,11 @@
+# Pepsiman Extracted Files
+Testing/Pepsiman_Extracted/
+
+# Python artifacts
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Thirdparty
+thirdparty/idecomp/
