@@ -36,9 +36,9 @@ You **must own the original CD-ROM** to use this project. No game files or copyr
    ```
 7. **Build the launcher (32-bit):**
    ```bash
-   gcc PlayPepsiman.c -o PlayPepsiman2.exe -luser32 -lkernel32 -static-libgcc -m32
+   gcc PlayPepsiman.c -o PlayPepsiman.exe -luser32 -lkernel32 -static-libgcc -m32
    ```
-8. **Run `PlayPepsiman2.exe`** in the directory containing `dc_pepsi.exe`, `PepsimanHook.dll`, and the `pepsiman/` asset folder.
+8. **Run `PlayPepsiman.exe`** in the directory containing `dc_pepsi.exe`, `PepsimanHook.dll`, and the `pepsiman/` asset folder.
 
 > **Note:** The hook DLL and launcher must be **32-bit** (`-m32` flag) because the original game is a 32-bit application. A 64-bit DLL cannot be injected into a 32-bit process.
 
@@ -49,14 +49,13 @@ The `Portable_Pepsiman/` directory contains a fully pre-patched, ready-to-run de
 | File | Purpose |
 |------|---------|
 | `dc_pepsi.exe` | Patched original binary |
-| `PlayPepsiman2.exe` | **32-bit launcher + DLL injector** (recommended) |
-| `PlayPepsiman.exe` | 64-bit launcher (requires separate 32-bit injector) |
+| `PlayPepsiman.exe` | **32-bit launcher + DLL injector** (recommended) |
 | `PepsimanHook.dll` | Chroma-key + frame clearing hook DLL (32-bit) |
 | `Injector.exe` | Standalone DLL injector |
 | `dc_pep.tbd` | Animation database config |
 | `pepsiman/` | Extracted game assets (`.bac`, `.mot`, `.TRA`, textures) |
 
-**To use:** run `PlayPepsiman2.exe` from inside `Portable_Pepsiman/`.
+**To use:** run `PlayPepsiman.exe` from inside `Portable_Pepsiman/`.
 
 ## How It Works
 
@@ -109,9 +108,9 @@ Resolves its own directory, writes a `dc_pep.tbd` config file with absolute path
 gcc PepsimanHook.c -shared -o PepsimanHook.dll -luser32 -lgdi32 -static-libgcc -O2 -m32
 ```
 
-### PlayPepsiman2 (32-bit launcher + injector)
+### PlayPepsiman (32-bit launcher + injector)
 ```bash
-gcc PlayPepsiman.c -o PlayPepsiman2.exe -luser32 -lkernel32 -static-libgcc -O2 -m32
+gcc PlayPepsiman.c -o PlayPepsiman.exe -luser32 -lkernel32 -static-libgcc -O2 -m32
 ```
 
 > **Important:** Both the DLL and injector must be compiled as **32-bit** (`-m32`). 
