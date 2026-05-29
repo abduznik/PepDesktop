@@ -9,9 +9,6 @@ on:
 jobs:
   build-windows:
     runs-on: windows-latest
-    defaults:
-      run:
-        shell: msys2 {0}
 
     steps:
       - name: Checkout repository
@@ -25,30 +22,39 @@ jobs:
           install: >
             mingw-w64-x86_64-gcc
 
-      - name: Create output directory
-        run: mkdir -p build
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
 
-      - name: Build launcher (c launcher)
+      - name: Install PyInstaller
+        run: pip install pyinstaller
+
+      - name: Create output directory
+        run: mkdir build
+        shell: msys2 {0}
+
+      - name: Build launcher
         run: gcc launcher.c -o build/PlayPepsiman.exe -luser32 -lgdi32 -O2
+        shell: msys2 {0}
 
       - name: Build PepsimanHook DLL
         run: gcc PepsimanHook.c -shared -o build/PepsimanHook.dll -luser32 -lgdi32 -static-libgcc -O2
+        shell: msys2 {0}
 
-      - name: Build Injector (standalone DLL injector)
+      - name: Build Injector
         run: gcc Injector.c -o build/Injector.exe -luser32 -lkernel32 -O2
+        shell: msys2 {0}
 
-      - name: Check Python syntax
-        run: |
-          python -m py_compile make_portable.py
-          python -m py_compile extract_pepsi.py
+      - name: Package make_portable.py as standalone exe
+        run: pyinstaller --onefile --distpath build --name make_portable make_portable.py
+
+      - name: Package extract_pepsi.py as standalone exe
+        run: pyinstaller --onefile --distpath build --name extract_pepsi extract_pepsi.py
 
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
         with:
           name: PepDesktop-v${{ github.run_number }}
-          path: |
-            build/*.exe
-            build/*.dll
-            make_portable.py
-            extract_pepsi.py
+          path: build/*
           if-no-files-found: error
