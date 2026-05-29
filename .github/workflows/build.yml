@@ -54,11 +54,16 @@ jobs:
       - name: Package extract_pepsi.py as standalone exe
         run: pyinstaller --onefile --distpath build --name extract_pepsi extract_pepsi.py
 
+      - name: Create release zip
+        run: Compress-Archive -Path build/* -DestinationPath PepDesktop-v${{ github.run_number }}.zip
+
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
         with:
           name: PepDesktop-v${{ github.run_number }}
-          path: build/*
+          path: |
+            build/*
+            PepDesktop-v${{ github.run_number }}.zip
           if-no-files-found: error
 
       - name: Create Release
@@ -76,5 +81,9 @@ jobs:
             - `Injector.exe` — standalone DLL injector
             - `make_portable.exe` — binary patcher (no Python needed)
             - `extract_pepsi.exe` — asset extractor (no Python needed)
-          files: build/*
+
+            **Or grab the all-in-one zip:** `PepDesktop-v${{ github.run_number }}.zip`
+          files: |
+            build/*
+            PepDesktop-v${{ github.run_number }}.zip
           fail_on_unmatched_files: false
