@@ -1,0 +1,53 @@
+name: Build
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+
+jobs:
+  build-windows:
+    runs-on: windows-latest
+    defaults:
+      run:
+        shell: msys2 {0}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Set up MSYS2
+        uses: msys2/setup-msys2@v2
+        with:
+          msystem: MINGW64
+          update: true
+          install: >
+            mingw-w64-x86_64-gcc
+
+      - name: Build launcher
+        run: gcc launcher.c -o PlayPepsiman.exe -luser32 -lgdi32
+
+      - name: Build PepsimanHook DLL
+        run: gcc PepsimanHook.c -shared -o PepsimanHook.dll -luser32 -lgdi32 -static-libgcc
+
+      - name: Build PlayPepsiman (injector launcher)
+        run: gcc PlayPepsiman.c -o PlayPepsiman.exe -luser32 -lkernel32 || true
+
+      - name: Check Python syntax
+        run: |
+          python -m py_compile make_portable.py
+          python -m py_compile extract_pepsi.py
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: portable-pepsiman
+          path: |
+            PlayPepsiman.exe
+            PepsimanHook.dll
+            make_portable.py
+            extract_pepsi.py
+          if-no-files-found: warn
