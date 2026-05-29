@@ -1,5 +1,7 @@
 # PepDesktop
 
+![PepDesktop](Image.jpg)
+
 PepDesktop revives the original 1997 *Desktop Character Pepsiman* mascot for modern Windows 10/11 (64-bit).
 
 ## Legal Notice
