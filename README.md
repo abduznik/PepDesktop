@@ -1,6 +1,6 @@
-# Pepsiman 1997 Desktop Mascot Resurrection
+# PepDesktop
 
-Tools and patches to resurrect the original 1997 *Desktop Character Pepsiman* mascot and get it running on modern Windows 10/11 (64-bit).
+PepDesktop revives the original 1997 *Desktop Character Pepsiman* mascot for modern Windows 10/11 (64-bit).
 
 ## Legal Notice
 
