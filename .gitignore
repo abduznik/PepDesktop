@@ -21,3 +21,10 @@ Release/
 
 # Portable_Pepsiman/ - pre-built deployment (extracted by user)
 Portable_Pepsiman/
+
+# Temp / test directories
+transparency_tests/
+unshield*
+
+# Backup files
+*.bak

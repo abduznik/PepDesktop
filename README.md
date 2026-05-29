@@ -30,11 +30,17 @@ You **must own the original CD-ROM** to use this project. No game files or copyr
    ```bash
    gcc launcher.c -o PlayPepsiman.exe -luser32 -lgdi32
    ```
-6. **Build the hook DLL:**
+6. **Build the hook DLL (32-bit):**
    ```bash
-   gcc PepsimanHook.c -shared -o PepsimanHook.dll -luser32 -lgdi32 -static-libgcc
+   gcc PepsimanHook.c -shared -o PepsimanHook.dll -luser32 -lgdi32 -static-libgcc -m32
    ```
-7. **Run `PlayPepsiman.exe`** in the directory containing `dc_pepsi.exe`, `PepsimanHook.dll`, and the `pepsiman/` asset folder.
+7. **Build the launcher (32-bit):**
+   ```bash
+   gcc PlayPepsiman.c -o PlayPepsiman2.exe -luser32 -lkernel32 -static-libgcc -m32
+   ```
+8. **Run `PlayPepsiman2.exe`** in the directory containing `dc_pepsi.exe`, `PepsimanHook.dll`, and the `pepsiman/` asset folder.
+
+> **Note:** The hook DLL and launcher must be **32-bit** (`-m32` flag) because the original game is a 32-bit application. A 64-bit DLL cannot be injected into a 32-bit process.
 
 ## Alternative: Pre-built Portable Package
 
@@ -43,27 +49,26 @@ The `Portable_Pepsiman/` directory contains a fully pre-patched, ready-to-run de
 | File | Purpose |
 |------|---------|
 | `dc_pepsi.exe` | Patched original binary |
-| `PlayPepsiman.exe` | C launcher with DLL injection |
-| `PepsimanHook.dll` | BitBlt hook DLL |
-| `winmm.dll` | WinMM proxy for DLL injection |
-| `winmm_orig.dll` | Original system `winmm.dll` |
+| `PlayPepsiman2.exe` | **32-bit launcher + DLL injector** (recommended) |
+| `PlayPepsiman.exe` | 64-bit launcher (requires separate 32-bit injector) |
+| `PepsimanHook.dll` | Chroma-key + frame clearing hook DLL (32-bit) |
+| `Injector.exe` | Standalone DLL injector |
 | `dc_pep.tbd` | Animation database config |
 | `pepsiman/` | Extracted game assets (`.bac`, `.mot`, `.TRA`, textures) |
 
-**To use:** run `PlayPepsiman.exe` from inside `Portable_Pepsiman/`.
+**To use:** run `PlayPepsiman2.exe` from inside `Portable_Pepsiman/`.
 
 ## How It Works
 
-### The BitBlt Hook (`PepsimanHook.dll`)
+### The Hook DLL (`PepsimanHook.dll`)
 
-The original Pepsiman mascot renders itself on Windows 9x using two BitBlt operations per frame — `SRCAND` (mask) followed by `SRCPAINT` (sprite) — to produce transparency via the classic bitmask-over-bitmap technique. On modern Windows with DWM compositing, `GetDC(NULL)` no longer captures a reliable desktop background, so the mascot renders over a black (or garbage) backdrop.
+The original Pepsiman mascot renders itself using two BitBlt operations per frame — `SRCAND` (mask) followed by `SRCPAINT` (sprite) — to produce transparency. On modern Windows with DWM compositing, the desktop background behind the window is no longer readable, causing the character to render over a black void.
 
-The hook intercepts these two BitBlt raster operations inside `dc_pepsi.exe`:
+The hook uses two techniques:
 
-1. **`SRCAND` intercept** — creates an off-screen compositing DC, captures the real desktop behind the mascot window via `CreateDC("DISPLAY")`, then applies the mask.
-2. **`SRCPAINT` intercept** — paints the sprite onto the composited buffer, then copies the final result back to the original destination using `SRCCOPY`.
+1. **Chroma-key transparency** — the game window is set to `WS_EX_LAYERED` with black (`RGB(0,0,0)`) as the color key. Pure black pixels become transparent, revealing the desktop behind. This eliminates the black rectangle.
 
-A tracking thread continuously locates the Pepsiman window (by class `Afx:400000` or `Pepsiman4`) to follow it as it moves around the screen.
+2. **Frame clearing** — the `BitBlt` Import Address Table is patched to intercept `SRCAND` operations. Before each frame's mask is drawn, the draw area is filled with black. This clears residual pixels from the previous frame, preventing visual ghosting/smearing when the character moves. A 500ms backup clear handles edge cases where alternative raster ops are used.
 
 ### The Binary Patcher (`make_portable.py`)
 
@@ -99,20 +104,18 @@ Resolves its own directory, writes a `dc_pep.tbd` config file with absolute path
 
 ## Build Instructions
 
-### C Launcher
+### Pepsiman Hook DLL (32-bit)
 ```bash
-gcc launcher.c -o PlayPepsiman.exe -luser32 -lgdi32
+gcc PepsimanHook.c -shared -o PepsimanHook.dll -luser32 -lgdi32 -static-libgcc -O2 -m32
 ```
 
-### Pepsiman Hook DLL
+### PlayPepsiman2 (32-bit launcher + injector)
 ```bash
-gcc PepsimanHook.c -shared -o PepsimanHook.dll -luser32 -lgdi32 -static-libgcc
+gcc PlayPepsiman.c -o PlayPepsiman2.exe -luser32 -lkernel32 -static-libgcc -O2 -m32
 ```
 
-### PlayPepsiman (CreateRemoteThread injector)
-```bash
-gcc PlayPepsiman.c -o PlayPepsiman.exe -luser32 -lkernel32
-```
+> **Important:** Both the DLL and injector must be compiled as **32-bit** (`-m32`). 
+> The original game is a 32-bit PE executable and will reject a 64-bit DLL injection.
 
 ### Injector (standalone DLL injector)
 ```bash
@@ -128,6 +131,20 @@ gcc pepsi_hook.c -shared -o pepsi_hook.dll -Iminhook/include -Lminhook/build -lm
 ```bash
 gcc ScreenCapServer.c -o ScreenCapServer.exe -lgdi32 -luser32
 ```
+
+## Status
+
+| Feature | Status |
+|---------|--------|
+| Black background behind character | ✅ Fixed (chroma-key) |
+| Smearing/ghosting during movement | ✅ Mostly fixed (minor edge smears remain) |
+| Character walks left/right | ✅ Works |
+| Resize buttons (small/big) | ✅ Works |
+| Emote/animation buttons | ❌ Crashes (game code bug on modern Windows) |
+| Middle size button | ❌ Crashes |
+| Flickering | ✅ None |
+
+The emote button crashes are a compatibility issue in the original `dc_pepsi.exe` (null pointer dereference in animation loading code at address `0x45766E`). This is a bug in the 1997 game itself, not the hook DLL — it occurs with or without the hook loaded.
 
 ## Credits
 

@@ -1,154 +1,127 @@
+/* PepsimanHook.c — Chroma-key + SRCAND dest rect clear + slow backup */
 #define _WIN32_WINNT 0x0600
 #include <windows.h>
-#include <stdio.h>
-#include <string.h>
 
-typedef BOOL (WINAPI *BITBLT_T)(HDC, int, int, int, int, HDC, int, int, DWORD);
-BITBLT_T OriginalBitBlt = NULL;
+static DWORD g_ourPid = 0;
+static HWND g_targetHwnd = NULL;
+typedef BOOL (WINAPI *BITBLT_T)(HDC,int,int,int,int,HDC,int,int,DWORD);
+static BITBLT_T g_origBitBlt = NULL;
+static DWORD g_lastClear = 0;
 
-static HDC g_hCompDC = NULL;
-static HBITMAP g_hCompBmp = NULL;
-static RECT g_pepsiRect = {0, 0, 0, 0};
-static __thread BOOL g_inHook = FALSE;
-static BOOL g_loggedRect = FALSE;
-
-BOOL CALLBACK FindAfxWndEnum(HWND hwnd, LPARAM lParam) {
-    if (!IsWindow(hwnd)) return TRUE;
-    char cls[256];
-    if (GetClassName(hwnd, cls, sizeof(cls))) {
-        // Primary: Afx signature, Fallback: Pepsiman4
-        if (strncmp(cls, "Afx:400000", 10) == 0 || strcmp(cls, "Pepsiman4") == 0) {
-            RECT r;
-            if (GetWindowRect(hwnd, &r)) {
-                int w = r.right - r.left;
-                int h = r.bottom - r.top;
-                if (w >= 10 && w <= 300 && h >= 10 && h <= 300) {
-                    if (r.left >= 0 && r.left < 3000 && r.top >= 0 && r.top < 3000) {
-                        if (r.left != 8192 && r.top != 8192) {
-                            g_pepsiRect = r;
-                            if (!g_loggedRect) {
-                                FILE* f = fopen("dll_loaded.txt", "a");
-                                if (f) {
-                                    fprintf(f, "FIRST RECT LOCK: L:%ld T:%ld R:%ld B:%ld (Class: %s)\n", r.left, r.top, r.right, r.bottom, cls);
-                                    fclose(f);
-                                }
-                                g_loggedRect = TRUE;
-                            }
-                            return FALSE;
-                        }
-                    }
+/* ---- IAT patching ---- */
+static void patch_iat(const char *dll, const char *func, BITBLT_T hook, BITBLT_T *orig)
+{
+    HMODULE mod = GetModuleHandle(NULL);
+    if (!mod) return;
+    PIMAGE_DOS_HEADER dos = (PIMAGE_DOS_HEADER)mod;
+    PIMAGE_NT_HEADERS nt = (PIMAGE_NT_HEADERS)((BYTE*)mod + dos->e_lfanew);
+    PIMAGE_IMPORT_DESCRIPTOR imp = (PIMAGE_IMPORT_DESCRIPTOR)
+        ((BYTE*)mod + nt->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_IMPORT].VirtualAddress);
+    if (!imp) return;
+    while (imp->Name) {
+        if (lstrcmpiA((char*)((BYTE*)mod + imp->Name), dll) == 0) {
+            PIMAGE_THUNK_DATA thunk = (PIMAGE_THUNK_DATA)((BYTE*)mod + imp->FirstThunk);
+            while (thunk->u1.Function) {
+                FARPROC target = GetProcAddress(GetModuleHandleA(dll), func);
+                if (target && (PVOID)(thunk->u1.Function) == (PVOID)target) {
+                    *orig = (BITBLT_T)thunk->u1.Function;
+                    DWORD old;
+                    VirtualProtect(&thunk->u1.Function, sizeof(PVOID), PAGE_READWRITE, &old);
+                    thunk->u1.Function = (ULONG_PTR)hook;
+                    VirtualProtect(&thunk->u1.Function, sizeof(PVOID), old, &old);
+                    return;
                 }
+                thunk++;
             }
         }
+        imp++;
     }
-    return TRUE;
 }
 
-DWORD WINAPI TrackingThread(LPVOID lpParam) {
-    while (TRUE) {
-        EnumWindows(FindAfxWndEnum, 0);
+/* ---- Hooked BitBlt: clear draw rect on SRCAND (all DCs), slow backup ---- */
+static BOOL WINAPI Hooked_BitBlt(HDC hdc, int x, int y, int w, int h,
+    HDC hsrc, int sx, int sy, DWORD rop)
+{
+    if (g_origBitBlt) {
+        DWORD now = GetTickCount();
+        
+        /* SRCAND = start of frame draw. Clear this area to prevent ghosting. */
+        if (rop == 0x008800C6) {
+            g_lastClear = now;
+            RECT r = { x, y, x + w, y + h };
+            HBRUSH brush = CreateSolidBrush(RGB(0, 0, 0));
+            FillRect(hdc, &r, brush);
+            DeleteObject(brush);
+        }
+        /* Backup: if no SRCAND in 500ms, clear the entire visible window */
+        else if (g_targetHwnd && now - g_lastClear > 500) {
+            g_lastClear = now;
+            RECT cr;
+            GetClientRect(g_targetHwnd, &cr);
+            HDC wdc = GetDC(g_targetHwnd);
+            if (wdc) {
+                HBRUSH brush = CreateSolidBrush(RGB(0, 0, 0));
+                FillRect(wdc, &cr, brush);
+                DeleteObject(brush);
+                ReleaseDC(g_targetHwnd, wdc);
+            }
+        }
+        
+        return g_origBitBlt(hdc, x, y, w, h, hsrc, sx, sy, rop);
+    }
+    return FALSE;
+}
+
+/* ---- Chroma-key setup ---- */
+static BOOL CALLBACK find_win(HWND h, LPARAM)
+{
+    char cls[64];
+    if (!GetClassNameA(h, cls, sizeof(cls))) return TRUE;
+    int ok = 0;
+    for (int i = 0; cls[i]; i++) {
+        if (cls[i]=='A'&&cls[i+1]=='f'&&cls[i+2]=='x'&&cls[i+3]==':'
+         && cls[i+4]=='4'&&cls[i+5]=='0'&&cls[i+6]=='0'&&cls[i+7]=='0'
+         && cls[i+8]=='0') { ok=1; break; }
+        if (cls[i]=='P'&&cls[i+1]=='e'&&cls[i+2]=='p'&&cls[i+3]=='s'
+         && cls[i+4]=='i'&&cls[i+5]=='m'&&cls[i+6]=='a'&&cls[i+7]=='n') { ok=1; break; }
+    }
+    if (!ok) return TRUE;
+    RECT r;
+    if (!GetWindowRect(h, &r)) return TRUE;
+    if (r.left==8192 && r.top==8192) return TRUE;
+    if ((r.right-r.left) < 20) return TRUE;
+    DWORD pid;
+    GetWindowThreadProcessId(h, &pid);
+    if (pid != g_ourPid) return TRUE;
+    /* Apply chroma-key: black becomes transparent */
+    SetWindowLongPtr(h, GWL_EXSTYLE,
+        GetWindowLongPtr(h, GWL_EXSTYLE) | WS_EX_LAYERED);
+    SetLayeredWindowAttributes(h, RGB(0,0,0), 0, LWA_COLORKEY);
+    g_targetHwnd = h;
+    return FALSE;
+}
+
+static DWORD WINAPI thread_fn(LPVOID)
+{
+    LoadLibraryA("winmm_orig.dll");
+    /* Install BitBlt hook */
+    patch_iat("gdi32.dll", "BitBlt", Hooked_BitBlt, &g_origBitBlt);
+    /* Apply chroma-key */
+    for (int i = 0; i < 200; i++) {
+        EnumWindows(find_win, 0);
+        if (g_targetHwnd) break;
         Sleep(100);
     }
     return 0;
 }
 
-void SetupCompDC(HDC hTargetDC) {
-    if (g_hCompDC) return;
-    g_hCompDC = CreateCompatibleDC(hTargetDC);
-    if (!g_hCompDC) return;
-    g_hCompBmp = CreateCompatibleBitmap(hTargetDC, GetSystemMetrics(SM_CXSCREEN), GetSystemMetrics(SM_CYSCREEN));
-    if (g_hCompBmp) {
-        SelectObject(g_hCompDC, g_hCompBmp);
-    } else {
-        DeleteDC(g_hCompDC);
-        g_hCompDC = NULL;
-    }
-}
-
-void PatchIAT(HMODULE hModule, const char* dllName, const char* funcName, PVOID hookFunc, PVOID originalFunc) {
-    if (!hModule || !originalFunc) return;
-    PIMAGE_DOS_HEADER dosHeader = (PIMAGE_DOS_HEADER)hModule;
-    PIMAGE_NT_HEADERS ntHeaders = (PIMAGE_NT_HEADERS)((BYTE*)hModule + dosHeader->e_lfanew);
-    PIMAGE_IMPORT_DESCRIPTOR importDesc = (PIMAGE_IMPORT_DESCRIPTOR)((BYTE*)hModule + 
-        ntHeaders->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_IMPORT].VirtualAddress);
-    if (!importDesc) return;
-    while (importDesc->Name) {
-        if (lstrcmpiA((char*)((BYTE*)hModule + importDesc->Name), dllName) == 0) {
-            PIMAGE_THUNK_DATA thunk = (PIMAGE_THUNK_DATA)((BYTE*)hModule + importDesc->FirstThunk);
-            while (thunk->u1.Function) {
-                PROC* procAddr = (PROC*)&thunk->u1.Function;
-                if ((PVOID)*procAddr == originalFunc) {
-                    DWORD oldProtect;
-                    if (VirtualProtect(procAddr, sizeof(PVOID), PAGE_READWRITE, &oldProtect)) {
-                        *procAddr = (PROC)hookFunc;
-                        VirtualProtect(procAddr, sizeof(PVOID), oldProtect, &oldProtect);
-                    }
-                }
-                thunk++;
-            }
-        }
-        importDesc++;
-    }
-}
-
-BOOL WINAPI HookedBitBlt(HDC hdcDest, int nXDest, int nYDest, int nWidth, int nHeight, HDC hdcSrc, int nXSrc, int nYSrc, DWORD dwRop) {
-    if (g_inHook || !OriginalBitBlt) return OriginalBitBlt(hdcDest, nXDest, nYDest, nWidth, nHeight, hdcSrc, nXSrc, nYSrc, dwRop);
-
-    // Skip hook until we have a valid window position to prevent drawing at 0,0
-    if (g_pepsiRect.left == 0 && g_pepsiRect.top == 0) {
-        return OriginalBitBlt(hdcDest, nXDest, nYDest, nWidth, nHeight, hdcSrc, nXSrc, nYSrc, dwRop);
-    }
-
-    int realX = g_pepsiRect.left + nXDest;
-    int realY = g_pepsiRect.top + nYDest;
-
-    if (dwRop == 0x008800C6) { // SRCAND
-        g_inHook = TRUE;
-        SetupCompDC(hdcDest);
-        if (g_hCompDC) {
-            HDC hdcDisplay = CreateDC("DISPLAY", NULL, NULL, NULL);
-            if (hdcDisplay) {
-                OriginalBitBlt(g_hCompDC, 0, 0, nWidth, nHeight, hdcDisplay, realX, realY, SRCCOPY);
-                DeleteDC(hdcDisplay);
-            }
-            OriginalBitBlt(g_hCompDC, 0, 0, nWidth, nHeight, hdcSrc, nXSrc, nYSrc, SRCAND);
-        }
-        g_inHook = FALSE;
-        return TRUE; // Suppress original mascot blit
-    }
-
-    if (dwRop == 0x00EE0086) { // SRCPAINT
-        if (g_hCompDC != NULL) {
-            g_inHook = TRUE;
-            OriginalBitBlt(g_hCompDC, 0, 0, nWidth, nHeight, hdcSrc, nXSrc, nYSrc, SRCPAINT);
-            OriginalBitBlt(hdcDest, realX, realY, nWidth, nHeight, g_hCompDC, 0, 0, SRCCOPY);
-            g_inHook = FALSE;
-            return TRUE; // Suppress original mascot blit
-        }
-    }
-
-    return OriginalBitBlt(hdcDest, nXDest, nYDest, nWidth, nHeight, hdcSrc, nXSrc, nYSrc, dwRop);
-}
-
-DWORD WINAPI InitializationThread(LPVOID lpParam) {
-    Sleep(3000);
-    OriginalBitBlt = (BITBLT_T)GetProcAddress(GetModuleHandle("gdi32.dll"), "BitBlt");
-    PatchIAT(GetModuleHandle(NULL), "gdi32.dll", "BitBlt", (PVOID)HookedBitBlt, (PVOID)OriginalBitBlt);
-    HANDLE hTrack = CreateThread(NULL, 0, TrackingThread, NULL, 0, NULL);
-    if (hTrack) CloseHandle(hTrack);
-    return 0;
-}
-
-BOOL APIENTRY DllMain(HMODULE hModule, DWORD ul_reason_for_call, LPVOID lpReserved) {
-    if (ul_reason_for_call == DLL_PROCESS_ATTACH) {
-        HMODULE hOrig = LoadLibraryA("winmm_orig.dll");
-        FILE* f = fopen("dll_loaded.txt", "w");
-        if (f) {
-            fprintf(f, "DLL LOADED. winmm_orig handle: %p\n", hOrig);
-            fclose(f);
-        }
-        HANDLE hInit = CreateThread(NULL, 0, InitializationThread, NULL, 0, NULL);
-        if (hInit) CloseHandle(hInit);
+BOOL APIENTRY DllMain(HMODULE m, DWORD r, LPVOID)
+{
+    if (r == DLL_PROCESS_ATTACH) {
+        DisableThreadLibraryCalls(m);
+        g_ourPid = GetCurrentProcessId();
+        HANDLE h = CreateThread(NULL, 0, thread_fn, NULL, 0, NULL);
+        if (h) CloseHandle(h);
     }
     return TRUE;
 }
